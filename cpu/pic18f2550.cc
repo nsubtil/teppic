@@ -141,27 +141,27 @@ void PIC18F2550::dispatch(pic16_decoded_insn *decode, pic16_insn insn)
         }
     }
 
-    WR(PCL, (PC & 0xff));
+    REGWR(PCL, (PC & 0xff));
 }
 
 void PIC18F2550::callstack_push(u32 dword)
 {
     u32 addr;
-    addr = RD(STKPTR);
+    addr = REGRD(STKPTR);
     addr++;
 
     mmc->stack_wd(addr, dword);
 
-    WR(TOSL, (dword & 0x0000ff));
-    WR(TOSH, (dword & 0x00ff00) >> 8);
-    WR(TOSU, (dword & 0xff0000) >> 16);
-    WR(STKPTR, addr);
+    REGWR(TOSL, (dword & 0x0000ff));
+    REGWR(TOSH, (dword & 0x00ff00) >> 8);
+    REGWR(TOSU, (dword & 0xff0000) >> 16);
+    REGWR(STKPTR, addr);
 }
 
 u32 PIC18F2550::callstack_pop(void)
 {
     u32 addr, val;
-    addr = RD(STKPTR);
+    addr = REGRD(STKPTR);
 
     if (addr & (1 << 6)) // STKFUL
     {
@@ -169,7 +169,7 @@ u32 PIC18F2550::callstack_pop(void)
     }
 
     val = mmc->stack_rd(addr);
-    WR(STKPTR, addr - 1);
+    REGWR(STKPTR, addr - 1);
 
     return val;
 }
@@ -178,9 +178,9 @@ void PIC18F2550::ADDLW(pic16_insn i)
 {
     u32 res;
 
-    res = alu_add8(RD(WREG), i.k.k);
+    res = alu_add8(REGRD(WREG), i.k.k);
     alu_set_flags(res, N | OV | C | DC | Z);
-    WR(WREG, RES8(res));
+    REGWR(WREG, RES8(res));
 }
 
 void PIC18F2550::ADDWF(pic16_insn i)
@@ -189,9 +189,9 @@ void PIC18F2550::ADDWF(pic16_insn i)
     u8 f;
 
     f = MEMRD(i.daf.f, i.daf.a);
-    res = alu_add8(RD(WREG), f);
+    res = alu_add8(REGRD(WREG), f);
     alu_set_flags(res, N | OV | C | DC | Z);
-    WR(WREG, RES8(res));
+    REGWR(WREG, RES8(res));
 }
 
 void PIC18F2550::ADDWFC(pic16_insn i)
@@ -202,10 +202,10 @@ void PIC18F2550::ADDWFC(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     f = FL_MEMRD(addr);
 
-    res = alu_add8(RD(WREG), f);
+    res = alu_add8(REGRD(WREG), f);
     alu_set_flags(res, N | OV | C | DC | Z);
 
-    if (RD(STATUS) & C)
+    if (REGRD(STATUS) & C)
     {
         u32 res2;
 
@@ -232,7 +232,7 @@ void PIC18F2550::ADDWFC(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, RES8(res));
+        REGWR(WREG, RES8(res));
     } else {
         FL_MEMWR(i.daf.f, RES8(res));
     }
@@ -242,7 +242,7 @@ void PIC18F2550::ANDLW(pic16_insn i)
 {
     u8 res;
 
-    res = RD(WREG) & i.k.k;
+    res = REGRD(WREG) & i.k.k;
 
     SET_N(res);
     SET_Z(res);
@@ -254,14 +254,14 @@ void PIC18F2550::ANDWF(pic16_insn i)
     u8 res;
 
     addr = FLAT(i.daf.f, i.daf.a);
-    res = RD(WREG) & FL_MEMRD(addr);
+    res = REGRD(WREG) & FL_MEMRD(addr);
 
     SET_N(res);
     SET_Z(res);
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -271,7 +271,7 @@ void PIC18F2550::BC(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (RD(STATUS) & C)
+    if (REGRD(STATUS) & C)
     {
         // sign-extend i.n.n into addpc
         if (ISNEG8(i.n.n))
@@ -307,7 +307,7 @@ void PIC18F2550::BN(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (RD(STATUS) & N)
+    if (REGRD(STATUS) & N)
     {
         // sign-extend i.n.n into addpc
         if (ISNEG8(i.n.n))
@@ -332,7 +332,7 @@ void PIC18F2550::BNC(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (!(RD(STATUS) & C))
+    if (!(REGRD(STATUS) & C))
     {
         // sign-extend i.n.n into addpc
         if (ISNEG8(i.n.n))
@@ -357,7 +357,7 @@ void PIC18F2550::BNN(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (!(RD(STATUS) & N))
+    if (!(REGRD(STATUS) & N))
     {
         if (ISNEG8(i.n.n))
         {
@@ -381,7 +381,7 @@ void PIC18F2550::BNOV(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (!(RD(STATUS) & OV))
+    if (!(REGRD(STATUS) & OV))
     {
         if (ISNEG8(i.n.n))
         {
@@ -405,7 +405,7 @@ void PIC18F2550::BNZ(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (!(RD(STATUS) & Z))
+    if (!(REGRD(STATUS) & Z))
     {
         if (ISNEG8(i.n.n))
         {
@@ -541,7 +541,7 @@ void PIC18F2550::BOV(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (RD(STATUS) & OV)
+    if (REGRD(STATUS) & OV)
     {
         if (ISNEG8(i.n.n))
         {
@@ -565,7 +565,7 @@ void PIC18F2550::BZ(pic16_insn i)
 {
     u32 addpc, clocks;
 
-    if (RD(STATUS) & Z)
+    if (REGRD(STATUS) & Z)
     {
         if (ISNEG8(i.n.n))
         {
@@ -601,9 +601,9 @@ void PIC18F2550::CALL(pic16_insn i)
     
     if (i.sk.s)
     {
-        WS = RD(WREG);
-        STATUSS = RD(STATUS);
-        BSRS = RD(BSR);
+        WS = REGRD(WREG);
+        STATUSS = REGRD(STATUS);
+        BSRS = REGRD(BSR);
     }
 
     PC = dest;
@@ -623,7 +623,7 @@ void PIC18F2550::CLRWDT(pic16_insn i)
 {
     WDT = 0;
 
-    WR(RCON, RD(RCON) |
+    REGWR(RCON, REGRD(RCON) |
        (1 << 2) | // PD
        (1 << 3)); // TO
 }
@@ -642,7 +642,7 @@ void PIC18F2550::COMF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -656,7 +656,7 @@ void PIC18F2550::CPFSEQ(pic16_insn i)
     addr = FLAT(i.af.f, i.af.a);
     val = FL_MEMRD(addr);
 
-    if (val == RD(WREG))
+    if (val == REGRD(WREG))
     {
         // skip next instruction
 
@@ -692,7 +692,7 @@ void PIC18F2550::CPFSGT(pic16_insn i)
     addr = FLAT(i.af.f, i.af.a);
     val = FL_MEMRD(addr);
 
-    if (val > RD(WREG))
+    if (val > REGRD(WREG))
     {
         // skip next instruction
 
@@ -728,7 +728,7 @@ void PIC18F2550::CPFSLT(pic16_insn i)
     addr = FLAT(i.af.f, i.af.a);
     val = FL_MEMRD(addr);
 
-    if (val < RD(WREG))
+    if (val < REGRD(WREG))
     {
         // skip next instruction
 
@@ -760,23 +760,23 @@ void PIC18F2550::DAW(pic16_insn /* i */)
 {
     u8 wl, wh, dc;
 
-    wl = RD(WREG) & 0xf;
-    wh = (RD(WREG) & 0xf0) >> 4;
-    dc = (RD(STATUS) & DC ? 1 : 0);
+    wl = REGRD(WREG) & 0xf;
+    wh = (REGRD(WREG) & 0xf0) >> 4;
+    dc = (REGRD(STATUS) & DC ? 1 : 0);
 
     if (wl > 9 || dc)
     {
         wl += 6;
     }
 
-    if (wh + dc > 9 || (RD(STATUS) & C))
+    if (wh + dc > 9 || (REGRD(STATUS) & C))
     {
         wh += 6 + dc;
     } else {
         wh += dc;
     }
 
-    WR(WREG, (wh << 4) | wl);
+    REGWR(WREG, (wh << 4) | wl);
 }
 
 void PIC18F2550::DECF(pic16_insn i)
@@ -791,7 +791,7 @@ void PIC18F2550::DECF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, RES8(res));
+        REGWR(WREG, RES8(res));
     } else {
         FL_MEMWR(addr, RES8(res));
     }
@@ -826,7 +826,7 @@ void PIC18F2550::DECFSZ(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -864,7 +864,7 @@ void PIC18F2550::DCFSNZ(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -896,7 +896,7 @@ void PIC18F2550::INCF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -931,7 +931,7 @@ void PIC18F2550::INCFSZ(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -977,7 +977,7 @@ void PIC18F2550::INFSNZ(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -990,11 +990,11 @@ void PIC18F2550::IORLW(pic16_insn i)
 {
     u32 res;
 
-    res = RD(WREG) | i.k.k;
+    res = REGRD(WREG) | i.k.k;
     SET_Z(res);
     SET_N(res);
 
-    WR(WREG, res);
+    REGWR(WREG, res);
 }
 
 void PIC18F2550::IORWF(pic16_insn i)
@@ -1005,13 +1005,13 @@ void PIC18F2550::IORWF(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
 
-    res = val | RD(WREG);
+    res = val | REGRD(WREG);
     SET_Z(res);
     SET_N(res);
 
     if (i.daf.d == 0)
     {
-        WR(WREG, res);
+        REGWR(WREG, res);
     } else {
         FL_MEMWR(addr, res);
     }
@@ -1027,18 +1027,18 @@ void PIC18F2550::LFSR(pic16_insn i)
     switch(i.fk.f)
     {
     case 0:
-        WR(FSR0L, i2.k.k);
-        WR(FSR0H, i.k.k);
+        REGWR(FSR0L, i2.k.k);
+        REGWR(FSR0H, i.k.k);
         break;
 
     case 1:
-        WR(FSR1L, i2.k.k);
-        WR(FSR1H, i.k.k);
+        REGWR(FSR1L, i2.k.k);
+        REGWR(FSR1H, i.k.k);
         break;
 
     case 2:
-        WR(FSR2L, i2.k.k);
-        WR(FSR2H, i.k.k);
+        REGWR(FSR2L, i2.k.k);
+        REGWR(FSR2H, i.k.k);
         break;
 
     case 3:
@@ -1060,7 +1060,7 @@ void PIC18F2550::MOVF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1080,12 +1080,12 @@ void PIC18F2550::MOVFF(pic16_insn i)
 
 void PIC18F2550::MOVLB(pic16_insn i)
 {
-    WR(BSR, i.k.k);
+    REGWR(BSR, i.k.k);
 }
 
 void PIC18F2550::MOVLW(pic16_insn i)
 {
-    WR(WREG, i.k.k);
+    REGWR(WREG, i.k.k);
 }
 
 void PIC18F2550::MOVWF(pic16_insn i)
@@ -1094,9 +1094,9 @@ void PIC18F2550::MOVWF(pic16_insn i)
 
     if (i.af.a == 0)
     {
-        AB_MEMWR(addr, RD(WREG));
+        AB_MEMWR(addr, REGRD(WREG));
     } else {
-        BSR_MEMWR(addr, RD(WREG));
+        BSR_MEMWR(addr, REGRD(WREG));
     }
 }
 
@@ -1104,10 +1104,10 @@ void PIC18F2550::MULLW(pic16_insn i)
 {
     u16 res;
 
-    res = RD(WREG) * i.k.k;
+    res = REGRD(WREG) * i.k.k;
 
-    WR(PRODL, res & 0xff);
-    WR(PRODH, (res & 0xff00) >> 8);
+    REGWR(PRODL, res & 0xff);
+    REGWR(PRODH, (res & 0xff00) >> 8);
 }
 
 void PIC18F2550::MULWF(pic16_insn i)
@@ -1119,10 +1119,10 @@ void PIC18F2550::MULWF(pic16_insn i)
     addr = FLAT(i.af.f, i.af.a);
     val = FL_MEMRD(addr);
 
-    res = val * RD(WREG);
+    res = val * REGRD(WREG);
 
-    WR(PRODL, res & 0xff);
-    WR(PRODH, (res & 0xff00) >> 8);
+    REGWR(PRODL, res & 0xff);
+    REGWR(PRODH, (res & 0xff00) >> 8);
 }
 
 void PIC18F2550::NEGF(pic16_insn i)
@@ -1180,9 +1180,9 @@ void PIC18F2550::RETFIE(pic16_insn i)
 {
     if (i.s.s)
     {
-        WR(WREG, WS);
-        WR(STATUS, STATUSS);
-        WR(BSR, BSRS);
+        REGWR(WREG, WS);
+        REGWR(STATUS, STATUSS);
+        REGWR(BSR, BSRS);
     }
 
     PC = callstack_pop();
@@ -1190,7 +1190,7 @@ void PIC18F2550::RETFIE(pic16_insn i)
 
 void PIC18F2550::RETLW(pic16_insn i)
 {
-    WR(WREG, i.k.k);
+    REGWR(WREG, i.k.k);
     PC = callstack_pop();
 }
 
@@ -1202,9 +1202,9 @@ void PIC18F2550::RETURN(pic16_insn i)
     
     if (i.s.s)
     {
-        WR(WREG, WS);
-        WR(STATUS, STATUSS);
-        WR(BSR, BSRS);
+        REGWR(WREG, WS);
+        REGWR(STATUS, STATUSS);
+        REGWR(BSR, BSRS);
     }
 
     PC = dest;
@@ -1220,7 +1220,7 @@ void PIC18F2550::RLCF(pic16_insn i)
     val = FL_MEMRD(addr);
 
     res = val << 1;
-    res |= (RD(STATUS) & C) ? 1 : 0;
+    res |= (REGRD(STATUS) & C) ? 1 : 0;
     val = res & 0xFF;
 
     if ((res & 0x0100))
@@ -1235,7 +1235,7 @@ void PIC18F2550::RLCF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1258,7 +1258,7 @@ void PIC18F2550::RLNCF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1273,7 +1273,7 @@ void PIC18F2550::RRCF(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
 
-    res = ((val & 1) << 8) | (val >> 1) | ((RD(STATUS) & C) ? 1 << 7 : 0);
+    res = ((val & 1) << 8) | (val >> 1) | ((REGRD(STATUS) & C) ? 1 << 7 : 0);
     val = res & 0xFF;
 
     if ((res & 0x0100))
@@ -1288,7 +1288,7 @@ void PIC18F2550::RRCF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1311,7 +1311,7 @@ void PIC18F2550::RRNCF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1338,10 +1338,10 @@ void PIC18F2550::SUBFWB(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
     
-    res = alu_sub8(val, RD(WREG));
+    res = alu_sub8(val, REGRD(WREG));
     alu_set_flags(res, N | OV | C | DC | Z);
 
-    if (!(RD(STATUS) & C))
+    if (!(REGRD(STATUS) & C))
     {
         u32 res2;
 
@@ -1368,7 +1368,7 @@ void PIC18F2550::SUBFWB(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, RES8(res));
+        REGWR(WREG, RES8(res));
     } else {
         FL_MEMWR(addr, RES8(res));
     }
@@ -1378,9 +1378,9 @@ void PIC18F2550::SUBLW(pic16_insn i)
 {
     u32 res;
 
-    res = alu_sub8(i.k.k, RD(WREG));
+    res = alu_sub8(i.k.k, REGRD(WREG));
     alu_set_flags(res, N | OV | C | DC | Z);
-    WR(WREG, RES8(res));
+    REGWR(WREG, RES8(res));
 }
 
 void PIC18F2550::SUBWF(pic16_insn i)
@@ -1391,12 +1391,12 @@ void PIC18F2550::SUBWF(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
 
-    res = alu_sub8(val, RD(WREG));
+    res = alu_sub8(val, REGRD(WREG));
     alu_set_flags(res, N | OV | C | DC | Z);
     
     if (i.daf.d == 0)
     {
-        WR(WREG, RES8(res));
+        REGWR(WREG, RES8(res));
     } else {
         FL_MEMWR(addr, RES8(res));
     }
@@ -1410,10 +1410,10 @@ void PIC18F2550::SUBWFB(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
     
-    res = alu_sub8(val, RD(WREG));
+    res = alu_sub8(val, REGRD(WREG));
     alu_set_flags(res, N | OV | C | DC | Z);
     
-    if (!(RD(STATUS) & C))
+    if (!(REGRD(STATUS) & C))
     {
         u32 res2;
         
@@ -1440,7 +1440,7 @@ void PIC18F2550::SUBWFB(pic16_insn i)
     
     if (i.daf.d == 0)
     {
-        WR(WREG, RES8(res));
+        REGWR(WREG, RES8(res));
     } else {
         FL_MEMWR(addr, RES8(res));
     }
@@ -1458,7 +1458,7 @@ void PIC18F2550::SWAPF(pic16_insn i)
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }
@@ -1469,7 +1469,7 @@ void PIC18F2550::TBLRD(pic16_insn i)
     u32 addr;
     u8 val;
 
-#define TBLADDR() ((RD(TBLPTRU) << 16) | (RD(TBLPTRH) << 8) | (RD(TBLPTRL)))
+#define TBLADDR() ((REGRD(TBLPTRU) << 16) | (REGRD(TBLPTRH) << 8) | (REGRD(TBLPTRL)))
 
     switch(i.nn.n)
     {
@@ -1501,10 +1501,10 @@ void PIC18F2550::TBLRD(pic16_insn i)
         break;
     }
 
-    WR(TBLPTRL, addr & 0xFF);
-    WR(TBLPTRH, (addr >> 8) & 0xFF);
-    WR(TBLPTRU, (addr >> 16) & 0xFF);
-    WR(TABLAT, val);
+    REGWR(TBLPTRL, addr & 0xFF);
+    REGWR(TBLPTRH, (addr >> 8) & 0xFF);
+    REGWR(TBLPTRU, (addr >> 16) & 0xFF);
+    REGWR(TABLAT, val);
 }
 
 void PIC18F2550::TBLWT(pic16_insn i)
@@ -1518,7 +1518,7 @@ void PIC18F2550::TBLWT(pic16_insn i)
         addr++;
     }
 
-    mmc->code_wb(addr, RD(TABLAT));
+    mmc->code_wb(addr, REGRD(TABLAT));
     
     switch(i.nn.n)
     {
@@ -1531,9 +1531,9 @@ void PIC18F2550::TBLWT(pic16_insn i)
         break;
     }
 
-    WR(TBLPTRL, addr & 0xFF);
-    WR(TBLPTRH, (addr >> 8) & 0xFF);
-    WR(TBLPTRU, (addr >> 16) & 0xFF);   
+    REGWR(TBLPTRL, addr & 0xFF);
+    REGWR(TBLPTRH, (addr >> 8) & 0xFF);
+    REGWR(TBLPTRU, (addr >> 16) & 0xFF);   
 }
 
 void PIC18F2550::TSTFSZ(pic16_insn i)
@@ -1576,7 +1576,7 @@ void PIC18F2550::XORLW(pic16_insn i)
 {
     u8 val;
 
-    val = RD(WREG) ^ i.k.k;
+    val = REGRD(WREG) ^ i.k.k;
     SET_N(val);
     SET_Z(val);
 }
@@ -1589,11 +1589,11 @@ void PIC18F2550::XORWF(pic16_insn i)
     addr = FLAT(i.daf.f, i.daf.a);
     val = FL_MEMRD(addr);
 
-    val = RD(WREG) ^ val;
+    val = REGRD(WREG) ^ val;
 
     if (i.daf.d == 0)
     {
-        WR(WREG, val);
+        REGWR(WREG, val);
     } else {
         FL_MEMWR(addr, val);
     }

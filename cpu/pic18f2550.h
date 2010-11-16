@@ -48,21 +48,15 @@
 #define MEMRD(addr, a) FL_MEMRD(FLAT(addr, a))
 
 // macros to access registers
-#define RD(a) FL_MEMRD(a)
-#define WR(a, val) FL_MEMWR(a, val)
+#define REGRD(a) FL_MEMRD(a)
+#define REGWR(a, val) FL_MEMWR(a, val)
 
 #define HW_RD(a) FL_HW_MEMRD(a)
 #define HW_WR(a, val) FL_HW_MEMWR(a, val)
 
 // macros to set ALU status bits: carry, digit carry, zero, overflow, negative
-#define N  (1 << 4)
-#define OV (1 << 3)
-#define Z  (1 << 2)
-#define DC (1 << 1)
-#define C  (1 << 0)
-
-#define SET(bit) HW_WR(STATUS, RD(STATUS) | bit)
-#define CLR(bit) HW_WR(STATUS, RD(STATUS) & ~(bit))
+#define SET(bit) HW_WR(STATUS, REGRD(STATUS) | (1 << bit))
+#define CLR(bit) HW_WR(STATUS, REGRD(STATUS) & ~(1 << bit))
 
 #define SET_Z(a) if (a == 0) { SET(Z); } else { CLR(Z); }
 #define SET_N(a) if (ISNEG8(a)) { SET(N); } else { CLR(N); }
@@ -161,7 +155,7 @@ class PIC18F2550 : public PIC
     void callstack_push(u32 dword);
     u32 callstack_pop(void);
 
-#define P(f) \
+#define _P(f) \
  public:      \
      static void _##f(PIC18F2550 *pic, pic16_insn i)       \
      {                                                     \
@@ -170,77 +164,77 @@ class PIC18F2550 : public PIC
  private: \
     void f(pic16_insn i);
 
-    P( ADDLW);
-    P( ADDWF);
-    P(ADDWFC);
-    P( ANDLW);
-    P( ANDWF);
-    P(    BC);
-    P(   BCF);
-    P(    BN);
-    P(   BNC);
-    P(   BNN);
-    P(  BNOV);
-    P(   BNZ);
-    P(   BRA);
-    P(   BSF);
-    P( BTFSC);
-    P( BTFSS);
-    P(   BTG);
-    P(   BOV);
-    P(    BZ);
-    P(  CALL);
-    P(  CLRF);
-    P(CLRWDT);
-    P(  COMF);
-    P(CPFSEQ);
-    P(CPFSGT);
-    P(CPFSLT);
-    P(   DAW);
-    P(  DECF);
-    P(DECFSZ);
-    P(DCFSNZ);
-    P(  GOTO);
-    P(  INCF);
-    P(INCFSZ);
-    P(INFSNZ);
-    P( IORLW);
-    P( IORWF);
-    P(  LFSR);
-    P(  MOVF);
-    P( MOVFF);
-    P( MOVLB);
-    P( MOVLW);
-    P( MOVWF);
-    P( MULLW);
-    P( MULWF);
-    P(  NEGF);
-    P(   NOP);
-    P(   POP);
-    P(  PUSH);
-    P( RCALL);
-    P( RESET);
-    P(RETFIE);
-    P( RETLW);
-    P(RETURN);
-    P(  RLCF);
-    P( RLNCF);
-    P(  RRCF);
-    P( RRNCF);
-    P(  SETF);
-    P( SLEEP);
-    P(SUBFWB);
-    P( SUBLW);
-    P( SUBWF);
-    P(SUBWFB);
-    P( SWAPF);
-    P( TBLRD);
-    P( TBLWT);
-    P(TSTFSZ);
-    P( XORLW);
-    P( XORWF);
+    _P( ADDLW);
+    _P( ADDWF);
+    _P(ADDWFC);
+    _P( ANDLW);
+    _P( ANDWF);
+    _P(    BC);
+    _P(   BCF);
+    _P(    BN);
+    _P(   BNC);
+    _P(   BNN);
+    _P(  BNOV);
+    _P(   BNZ);
+    _P(   BRA);
+    _P(   BSF);
+    _P( BTFSC);
+    _P( BTFSS);
+    _P(   BTG);
+    _P(   BOV);
+    _P(    BZ);
+    _P(  CALL);
+    _P(  CLRF);
+    _P(CLRWDT);
+    _P(  COMF);
+    _P(CPFSEQ);
+    _P(CPFSGT);
+    _P(CPFSLT);
+    _P(   DAW);
+    _P(  DECF);
+    _P(DECFSZ);
+    _P(DCFSNZ);
+    _P(  GOTO);
+    _P(  INCF);
+    _P(INCFSZ);
+    _P(INFSNZ);
+    _P( IORLW);
+    _P( IORWF);
+    _P(  LFSR);
+    _P(  MOVF);
+    _P( MOVFF);
+    _P( MOVLB);
+    _P( MOVLW);
+    _P( MOVWF);
+    _P( MULLW);
+    _P( MULWF);
+    _P(  NEGF);
+    _P(   NOP);
+    _P(   POP);
+    _P(  PUSH);
+    _P( RCALL);
+    _P( RESET);
+    _P(RETFIE);
+    _P( RETLW);
+    _P(RETURN);
+    _P(  RLCF);
+    _P( RLNCF);
+    _P(  RRCF);
+    _P( RRNCF);
+    _P(  SETF);
+    _P( SLEEP);
+    _P(SUBFWB);
+    _P( SUBLW);
+    _P( SUBWF);
+    _P(SUBWFB);
+    _P( SWAPF);
+    _P( TBLRD);
+    _P( TBLWT);
+    _P(TSTFSZ);
+    _P( XORLW);
+    _P( XORWF);
 
-#undef P
+#undef _P
 
 };
 
