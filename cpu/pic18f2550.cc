@@ -1090,14 +1090,7 @@ void PIC18F2550::MOVLW(pic16_insn i)
 
 void PIC18F2550::MOVWF(pic16_insn i)
 {
-    u32 addr;
-
-    if (i.af.a == 0)
-    {
-        AB_MEMWR(addr, REGRD(WREG));
-    } else {
-        BSR_MEMWR(addr, REGRD(WREG));
-    }
+    MEMWR(i.af.f, i.af.a, REGRD(WREG));
 }
 
 void PIC18F2550::MULLW(pic16_insn i)

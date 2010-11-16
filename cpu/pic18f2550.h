@@ -46,6 +46,8 @@
 #define FLAT(addr, a) ((a) == 0 ? AB_TO_FL(addr) : BSR_TO_FL(addr))
 // BSR/AB memory read
 #define MEMRD(addr, a) FL_MEMRD(FLAT(addr, a))
+// BSR/AB memory write
+#define MEMWR(addr, a, val) FL_MEMWR(FLAT(addr, a), val)
 
 // macros to access registers
 #define REGRD(a) FL_MEMRD(a)
