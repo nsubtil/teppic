@@ -15,6 +15,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 
-include_directories(${teppic_SOURCE_DIR})
-add_library(mem STATIC mmc.cc m18fx550.cc)
+add_subdirectory(cpu)
+add_subdirectory(mem)
+
+add_library(teppic STATIC ${teppic_source_files})
 

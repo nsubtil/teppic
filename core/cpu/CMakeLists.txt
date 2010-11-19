@@ -15,14 +15,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 2.6)
-project(teppic)
+set(cpu_sources
+    cpu/pic.cc
+    cpu/pic.h
+    cpu/pic18f2550.cc
+    cpu/pic18f2550.h
+    cpu/pic18f2550_registers.h
+)
 
-include_directories(${teppic_SOURCE_DIR}/core ${teppic_SOURCE_DIR}/ui)
-
-add_subdirectory(core)
-add_subdirectory(ui)
-
-add_executable(teppic-test main.cc)
-target_link_libraries(teppic-test teppic)
+set(teppic_source_files ${teppic_source_files} ${cpu_sources} PARENT_SCOPE)
 
