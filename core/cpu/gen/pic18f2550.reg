@@ -1,0 +1,88 @@
+#  Copyright (C) 2010, Nuno Subtil
+#
+#  This file is part of Teppic.
+#
+#  Teppic is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#  
+#  Teppic is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
+
+# PIC18F2550 register file description
+
+device pic18f2550
+
+# register <register-name>
+#          description "<string>" (default: nil)
+#          address  <flat-address>
+#          size     <byte-size> (default: 1)
+#          read-mask    <mask> (default: all 1s)
+#          write-mask   <mask> (default: all 1s)
+#
+#          # initialization conditions
+#          power-on     <val> [mask <m>] (value at power-on reset, default: 0)
+#          brown-out    <val> [mask <m>] (value at brown-out reset, default: same as power-on)
+#
+#          reset        <val> [mask <m>] (value at software reset, default: 0)
+#          mclr-run     <val> [mask <m>] (value at mclr power-managed run reset, default: same as reset)
+#          mclr-sleep   <val> [mask <m>] (value at mclr idle/sleep run reset, default: same as reset)
+#          wdt          <val> [mask <m>] (value at watchdog timeout reset, default: same as reset)
+#          stack-ov     <val> [mask <m>] (value at stack overflow reset, default: same as reset)
+#          stack-uf     <val> [mask <m>] (value at stack underflow reset, default: same as reset)
+#
+#          wake-up-intr <val> [mask <m>] (value at interrupt wake-up, default: u)
+#          wake-up-wdt  <val> [mask <m>] (value at watchdog timeout wake-up, default: same as wake-up-intr)
+#
+#          bit  <bit-name> <bit-index> ["<description>"]
+#          ...
+#
+#          alias <sub-register-name> <flat-address> (aliases are always one byte)
+#
+#          ....
+# end
+
+register TOS
+         address    0ffd
+         size 3
+         read-mask  1fffff
+         write-mask 1fffff
+
+         power-on 0
+         brown-out f mask f
+
+         alias TOSL 0ffd
+         alias TOSH 0ffe
+         alias TOSU 0fff
+end
+
+register STKPTR
+         address    0ffc
+         read-mask  df
+         write-mask df
+
+         reset      0 mask 1f
+end
+
+# ...
+
+register STATUS
+         address    0fd8
+         read-mask  1f
+         write-mask 1f
+
+         power-on   0 mask 0
+         reset      0 mask 0
+
+         bit        C   0
+         bit        DC  1
+         bit        Z   2
+         bit        OV  3
+         bit        N   4
+end
