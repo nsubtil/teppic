@@ -17,22 +17,25 @@
   along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "mainwindow.h"
-#include "registerwindow.h"
+#ifndef __REGISTER_WINDOW_H
+#define __REGISTER_WINDOW_H
 
-int main(int argc, char **argv)
+#include <QDockWidget>
+#include "ui_registerwindow.h"
+
+class RegisterWindow : public QDockWidget
 {
-    QApplication app(argc, argv);
+    Q_OBJECT
 
-    MainWindow win;
-    win.setWindowTitle(QObject::tr("Teppic"));
-    win.show();
+public:
+    RegisterWindow(QWidget *parent = NULL);
 
-    RegisterWindow regwin(&win);
-    regwin.setWindowTitle(QObject::tr("Register map"));
-    regwin.setFloating(true);
-    regwin.show();
+public slots:
+signals:
 
-    return app.exec();
-}
+private:
+    Ui::RegisterWidget ui;
+};
+
+#endif
 

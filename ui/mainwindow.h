@@ -21,7 +21,7 @@
 #define __MAIN_WINDOW_H
 
 #include <QMainWindow>
-#include "ui_MainWindow.h"
+#include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow
 {

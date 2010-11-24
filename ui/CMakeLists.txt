@@ -20,17 +20,20 @@ include(${QT_USE_FILE})
 
 set(qt_SRCS
     mainwindow.cc
+    registerwindow.cc
     codeeditor.cc
     main.cc
 )
 
 set(qt_MOC_H
     mainwindow.h
+    registerwindow.h
     codeeditor.h
 )
 
 set(qt_UI
     mainwindow.ui
+    registerwindow.ui
 )
 
 qt4_automoc(${qt_SRCS})
