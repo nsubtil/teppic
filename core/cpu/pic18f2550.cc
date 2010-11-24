@@ -878,7 +878,7 @@ void PIC18F2550::GOTO(pic16_insn i)
     pic16_insn i2;
 
     i2 = fetch(PC + 2);
-    assert(i2.ek.o == 0xf000);
+    assert(i2.ek.o == 0xf);
 
     PC = (i.k.k << 1) | (i2.ek.k << 8);
 }
