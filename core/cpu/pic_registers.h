@@ -23,9 +23,14 @@
 typedef struct PICRegisterBitRec
 {
     char *name;
-    u32 bit_start;
-    u32 bit_end;
+    u32 bit;
 } PICRegisterBit;
+
+typedef struct PICRegisterAliasRec
+{
+    char *name;
+    u32 addr;
+} PICRegisterAlias;
 
 typedef struct PICRegisterRec
 {
@@ -37,14 +42,12 @@ typedef struct PICRegisterRec
     u32 writeMask;
 
     PICRegisterBit *bits;
-    PICRegister *sub;
+    PICRegisterAlias *aliases;
 } PICRegister;
 
 typedef struct PICRegisterFileRec
 {
-public:
     PICRegister *registers;
-    u8 *changetable;
 } PICRegisterFile;
 
 #endif

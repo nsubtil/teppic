@@ -19,58 +19,848 @@
 
 device pic18f2550
 
-# register <register-name>
-#          description "<string>" (default: nil)
-#          address  <flat-address>
-#          size     <byte-size> (default: 1)
-#          read-mask    <mask> (default: all 1s)
-#          write-mask   <mask> (default: all 1s)
-#
-#          # initialization conditions
-#          power-on     <val> [mask <m>] (value at power-on reset, default: 0)
-#          brown-out    <val> [mask <m>] (value at brown-out reset, default: same as power-on)
-#
-#          reset        <val> [mask <m>] (value at software reset, default: 0)
-#          mclr-run     <val> [mask <m>] (value at mclr power-managed run reset, default: same as reset)
-#          mclr-sleep   <val> [mask <m>] (value at mclr idle/sleep run reset, default: same as reset)
-#          wdt          <val> [mask <m>] (value at watchdog timeout reset, default: same as reset)
-#          stack-ov     <val> [mask <m>] (value at stack overflow reset, default: same as reset)
-#          stack-uf     <val> [mask <m>] (value at stack underflow reset, default: same as reset)
-#
-#          wake-up-intr <val> [mask <m>] (value at interrupt wake-up, default: u)
-#          wake-up-wdt  <val> [mask <m>] (value at watchdog timeout wake-up, default: same as wake-up-intr)
-#
-#          bit  <bit-name> <bit-index> ["<description>"]
-#          ...
-#
-#          alias <sub-register-name> <flat-address> (aliases are always one byte)
-#
-#          ....
-# end
+unimplemented 0f60
+unimplemented 0f61
+unimplemented 0f62
+unimplemented 0f63
+unimplemented 0f64
+unimplemented 0f65
 
-register TOS
-         address    0ffd
-         size 3
-         read-mask  1fffff
-         write-mask 1fffff
+register UFRM
+         address    0f66
+         size       2
+         read-mask  07ff
+         write-mask 07ff
 
-         power-on 0
-         brown-out f mask f
-
-         alias TOSL 0ffd
-         alias TOSH 0ffe
-         alias TOSU 0fff
+         alias      UFRML 0f66
+         alias      UFRMH 0f67
 end
 
-register STKPTR
-         address    0ffc
+register UIR
+         address    0f68
+         read-mask  07f
+         write-mask 07f
+
+         bit        URSTIF  0
+         bit        UERRIF  1
+         bit        ACTVIF  2
+         bit        TRNIF   3
+         bit        IDLEIF  4
+         bit        STALLIF 5
+         bit        SOFIF   6
+end
+
+register UIE
+         address    0f69
+         read-mask  07f
+         write-mask 07f
+
+         bit        URSTIF  0
+         bit        UERRIF  1
+         bit        ACTVIF  2
+         bit        TRNIF   3
+         bit        IDLEIF  4
+         bit        STALLIF 5
+         bit        SOFIF   6
+end
+
+register UEIR
+         address    0f6a
+         read-mask  09f
+         write-mask 09f
+
+         bit        PIDEF   0
+         bit        CRC5EF  1
+         bit        CRC16EF 2
+         bit        DFN8EF  3
+         bit        BTOEF   4
+         bit        BTSEF   7
+end
+
+register UEIE
+         address    0f6b
+         read-mask  09f
+         write-mask 09f
+
+         bit        PIDEF   0
+         bit        CRC5EF  1
+         bit        CRC16EF 2
+         bit        DFN8EF  3
+         bit        BTOEF   4
+         bit        BTSEF   7
+end
+
+register USTAT
+         address    0f6c
+         read-mask  07e
+         write-mask 07e
+
+         bit        PPBI    1
+         bit        DIR     2
+         bit        ENDP0   3
+         bit        ENDP1   4
+         bit        ENDP2   5
+         bit        ENDP3   6
+end
+
+register UCON
+         address    0f6d
+         read-mask  07e
+         write-mask 07e
+
+         bit        SUSPND  1
+         bit        RESUME  2
+         bit        USBEN   3
+         bit        PKTDIS  4
+         bit        SE0     5
+         bit        PPBRST  6
+end
+
+register UADDR
+         address    0f6e
+         read-mask  07f
+         write-mask 07f
+end
+
+register UCFG
+         address    0f6f
+         read-mask  0df
+         write-mask 0df
+
+         bit        PPB0    0
+         bit        PPB1    1
+         bit        FSEN    2
+         bit        UTRDIS  3
+         bit        UPUEN   4
+         bit        UOEMON  6
+         bit        UTEYE   7
+end
+
+register UEP0
+         address    0f70
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP1
+         address    0f71
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP2
+         address    0f72
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP3
+         address    0f73
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP4
+         address    0f74
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP5
+         address    0f75
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP6
+         address    0f76
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP7
+         address    0f77
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP8
+         address    0f78
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP9
+         address    0f79
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP10
+         address    0f7a
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP11
+         address    0f7b
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP12
+         address    0f7c
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP13
+         address    0f7d
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP14
+         address    0f7e
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register UEP15
+         address    0f7f
+         read-mask  1f
+         write-mask 1f
+
+         bit        EPSTALL  0
+         bit        EPINEN   1
+         bit        EPOUTEN  2
+         bit        EPCONDIS 3
+         bit        EPHSHK   4
+end
+
+register PORTA
+         address    0f80
+         read-mask  7f
+         write-mask 7f
+
+         bit        RA0     0
+         bit        RA1     1
+         bit        RA2     2
+         bit        RA3     3
+         bit        RA4     4
+         bit        RA5     5
+         # RA6 is configured as a port pin based on various primary oscillator modes
+         # when the port pin is disabled, all of the associated bits read 0
+         bit        RA6     6
+end
+
+register PORTB
+         address    0f81
+         read-mask  ff
+         write-mask ff
+
+         bit        RB0     0
+         bit        RB1     1
+         bit        RB2     2
+         bit        RB3     3
+         bit        RB4     4
+         bit        RB5     5
+         bit        RB6     6
+         bit        RB7     7
+end
+
+register PORTC
+         address    0f82
+         read-mask  f7
+         write-mask f7
+
+         bit        RC0     0
+         bit        RC1     1
+         bit        RC2     2
+         # RC5 and RC5 are only available as port pins when the USB module is disabled (UCON<3> = 0)
+         bit        RC4     4
+         bit        RC5     5
+         bit        RC6     6
+         bit        RC7     7
+end
+
+# PORTD on 44-pin devices
+unimplemented 0f83
+
+register PORTE
+         address    0f84
+         read-mask  8
+         write-mask 8
+
+         bit        RE3     3
+end
+
+unimplemented 0f85
+unimplemented 0f86
+unimplemented 0f87
+unimplemented 0f88
+
+register LATA
+         address    0f89
+         read-mask  7f
+         write-mask 7f
+
+         bit        LATA0   0
+         bit        LATA1   1
+         bit        LATA2   2
+         bit        LATA3   3
+         bit        LATA4   4
+         bit        LATA5   5
+         # RA6 is configured as a port pin based on varius primary oscillator modes
+         # when the port pin is disabled, all of the associated bits read 0
+         bit        LATA6   6
+end
+
+register LATB
+         address    0f8a
+         read-mask  ff
+         write-mask ff
+
+         bit        LATB0   0
+         bit        LATB1   1
+         bit        LATB2   2
+         bit        LATB3   3
+         bit        LATB4   4
+         bit        LATB5   5
+         bit        LATB6   6
+         bit        LATB7   7
+end
+
+register LATC
+         address    0f8b
+         read-mask  c7
+         write-mask c7
+
+         bit        LATC0   0
+         bit        LATC1   1
+         bit        LATC2   2
+         bit        LATC6   6
+         bit        LATC7   7
+end
+
+# LATD on 44-pin devices
+unimplemented 0f8c
+# LATE on 44-pin devices
+unimplemented 0f8d
+unimplemented 0f8e
+unimplemented 0f8f
+unimplemented 0f90
+unimplemented 0f91
+
+register TRISA
+         address    0f92
+         read-mask  7f
+         write-mask 7f
+
+         bit        TRISA0  0
+         bit        TRISA1  1
+         bit        TRISA2  2
+         bit        TRISA3  3
+         bit        TRISA4  4
+         bit        TRISA5  5
+         # RA6 is configured as a port pin based on varius primary oscillator modes
+         # when the port pin is disabled, all of the associated bits read 0
+         bit        TRISA6  6
+end
+
+register TRISB
+         address    0f93
+         read-mask  ff
+         write-mask ff
+
+         bit        TRISB0  0
+         bit        TRISB1  1
+         bit        TRISB2  2
+         bit        TRISB3  3
+         bit        TRISB4  4
+         bit        TRISB5  5
+         bit        TRISB6  6
+         bit        TRISB7  7
+end
+
+register TRISC
+         address    0f94
+         read-mask  c7
+         write-mask c7
+
+         bit        TRISC0  0
+         bit        TRISC1  1
+         bit        TRISC2  2
+         bit        TRISC6  6
+         bit        TRISC7  7
+end
+
+# TRISD on 44-pin devices
+unimplemented 0f95
+# TRISE on 44-pin devices
+unimplemented 0f96
+unimplemented 0f97
+unimplemented 0f98
+unimplemented 0f99
+unimplemented 0f9a
+
+register OSCTUNE
+         address    0f9b
+         read-mask  97
+         write-mask 97
+
+         bit        TUN0    0
+         bit        TUN1    1
+         bit        TUN2    2
+         bit        TUN3    3
+         bit        TUN4    4
+         bit        INTSRC  7
+end
+
+unimplemented 0f9c
+
+register PIE1
+         address    0f9d
+         read-mask  7f
+         write-mask 7f
+
+         bit        TMR1IE  0
+         bit        TMR2IE  1
+         bit        CCP1IE  2
+         bit        SSPIE   3
+         bit        TXIE    4
+         bit        RCIE    5
+         bit        ADIE    6
+end
+
+register PIR1
+         address    0f9e
+         read-mask  7f
+         write-mask 7f
+
+         bit        TMR1IF  0
+         bit        TMR2IF  1
+         bit        CCP1IF  2
+         bit        SSPIF   3
+         bit        TXIF    4
+         bit        RCIF    5
+         bit        ADIF    6
+end
+
+register IPR1
+         address    0f9f
+         read-mask  7f
+         write-mask 7f
+
+         bit        TMR1IP  0
+         bit        TMR2IP  1
+         bit        CCP1IP  2
+         bit        SSPIP   3
+         bit        TXIP    4
+         bit        RCIP    5
+         bit        ADIP    6
+end
+
+register PIE2
+         address    0fa0
+         read-mask  ff
+         write-mask ff
+
+         bit        CCP2IE  0
+         bit        TMR3IE  1
+         bit        HLVDIE  2
+         bit        BCLIE   3
+         bit        EEIE    4
+         bit        USBIE   5
+         bit        CMIE    6
+         bit        OSCFIE  7
+end
+
+register PIR2
+         address    0fa1
+         read-mask  ff
+         write-mask ff
+
+         bit        CCP2IF  0
+         bit        TMR3IF  1
+         bit        HLVDIF  2
+         bit        BCLIF   3
+         bit        EEIF    4
+         bit        USBIF   5
+         bit        CMIF    6
+         bit        OSCFIF  7
+end
+
+register IPR2
+         address    0fa2
+         read-mask  ff
+         write-mask ff
+
+         bit        CCP2IP  0
+         bit        TMR3IP  1
+         bit        HLVDIP  2
+         bit        BCLIP   3
+         bit        EEIP    4
+         bit        USBIP   5
+         bit        CMIP    6
+         bit        OSCFIP  7
+end
+
+unimplemented 0fa3
+unimplemented 0fa4
+unimplemented 0fa5
+
+register EECON1
+         address    0fa6
          read-mask  df
          write-mask df
 
-         reset      0 mask 1f
+         bit        RD      0
+         bit        WR      1
+         bit        WREN    2
+         bit        WRERR   3
+         bit        FREE    4
+         bit        CFGS    6
+         bit        EEPGD   7
 end
 
-# ...
+# not a physical register
+register EECON2
+         address    0fa7
+end
+
+register EEDATA
+         address    0fa8
+end
+
+register EEADR
+         address    0fa9
+end
+
+unimplemented 0faa
+
+register RCSTA
+         address    0fab
+         read-mask  ff
+         write-mask ff
+
+         bit        RX9D    0
+         bit        OERR    1
+         bit        FERR    2
+         bit        ADDEN   3
+         bit        CRNE    4
+         bit        SREN    5
+         bit        RX9     6
+         bit        SPEN    7
+end
+
+register TXSTA
+         address    0fac
+         read-mask  ff
+         write-mask ff
+
+         bit        TX9D    0
+         bit        TRMT    1
+         bit        BRGH    2
+         bit        SENDB   3
+         bit        SYNC    4
+         bit        TXEN    5
+         bit        TX9     6
+         bit        CSRC    7
+end
+
+register TXREG
+         address    0fad
+end
+
+register RCREG
+         address    0fae
+end
+
+register SPBRG
+         address    0faf
+         size       2
+
+         alias      SPBRGH 0fb0
+end
+
+register T3CON
+         address    0fb1
+
+         bit        TMR3ON  0
+         bit        TMR3CS  1
+         bit        T3SYNC  2
+         bit        T3CCP1  3
+         bit        T3CKPS0 4
+         bit        T3CKPS1 5
+         bit        T3CCP2  6
+         bit        RD16    7
+end
+
+register TMR3
+         address    0fb2
+         size       2
+
+         alias      TMR3L 0fb2
+         alias      TMR3H 0fb3
+end
+
+register CMCON
+         address    0fb4
+
+         bit        CM0     0
+         bit        CM1     1
+         bit        CM2     2
+         bit        CIS     3
+         bit        C1INV   4
+         bit        C2INV   5
+         bit        C1OUT   6
+         bit        C2OUT   7
+end
+
+register CVRCON
+         address    0fb5
+
+         bit        CVR0    0
+         bit        CVR1    1
+         bit        CVR2    2
+         bit        CVR3    3
+         bit        CVRSS   4
+         bit        CVRR    5
+         bit        CVROE   6
+         bit        CVREN   7
+end
+
+register ECCP1AS
+         address    0fb6
+         read-mask  fc
+         write-mask fc
+
+         bit        PSSAC0  2
+         bit        PSSAC1  3
+         bit        ECCPAS0 4
+         bit        ECCPAS1 5
+         bit        ECCPAS2 6
+         bit        ECCPAS3 7
+end
+
+register ECCP1DEL
+         address    0fb7
+end
+
+register BAUDCON
+         address    0fb8
+end
+
+unimplemented 0fb9
+
+register CCP2CON
+         address    0fba
+end
+
+register CCPR2
+         address    0fbb
+         size       2
+
+         alias      CCPR2L 0fbb
+         alias      CCPR2H 0fbc
+end
+
+register CCP1CON
+         address    0fbd
+end
+
+register CCPR1
+         address    0fbe
+         size       2
+
+         alias      CCPR1L 0fbe
+         alias      CCPR1H 0fbf
+end
+
+register ADCON2
+         address    0fc0
+end
+
+register ADCON1
+         address    0fc1
+end
+
+register ADCON0
+         address    0fc2
+end
+
+register ADRES
+         address    0fc3
+         size       2
+
+         alias      ADRESL 0fc3
+         alias      ADRESH 0fc4
+end
+
+register SSPCON2
+         address    0fc5
+end
+
+register SSPCON1
+         address    0fc6
+end
+
+register SSPSTAT
+         address    0fc7
+end
+
+register SSPADD
+         address    0fc8
+end
+
+register SSPBUF
+         address    0fc9
+end
+
+register T2CON
+         address    0fca
+end
+
+register PR2
+         address    0fcb
+end
+
+register TMR2
+         address    0fcc
+end
+
+register T1CON
+         address    0fcd
+end
+
+register TMR1
+         address    0fce
+         size       2
+
+         alias      TMR1L 0fce
+         alias      TMR1H 0fcf
+end
+
+register RCON
+         address    0fd0
+end
+
+register WDTCON
+         address    0fd1
+end
+
+register HLVDCON
+         address    0fd2
+end
+
+register OSCCON
+         address    0fd3
+end
+
+unimplemented 0fd4
+
+register T0CON
+         address    0fd5
+end
+
+register TMR0
+         address    0fd6
+         size       2
+
+         alias      TMR0L 0fd6
+         alias      TMR0H 0fd7
+end
 
 register STATUS
          address    0fd8
@@ -85,4 +875,175 @@ register STATUS
          bit        Z   2
          bit        OV  3
          bit        N   4
+end
+
+register FSR2
+         address    0fd9
+         size       2
+
+         alias      FSR2L 0fd9
+         alias      FSR2H 0fda
+end
+
+# not a physical register
+register PLUSW2
+         address    0fdb
+end
+
+# not a physical register
+register PREINC2
+         address    0fdc
+end
+
+# not a physical register
+register POSTDEC2
+         address    0fdd
+end
+
+# not a physical register
+register POSTINC2
+         address    0fde
+end
+
+# not a physical register
+register INDF2
+         address    0fdf
+end
+
+register BSR
+         address    0fe0
+end
+
+register FSR1
+         address    0fe1
+         size       2
+
+         alias      FSR1L 0fe1
+         alias      FSR1H 0fe2
+end
+
+# not a physical register
+register PLUSW1
+         address    0fe3
+end
+
+# not a physical register
+register PREINC1
+         address    0fe4
+end
+
+# not a physical register
+register POSTDEC1
+         address    0fe5
+end
+
+# not a physical register
+register POSTINC1
+         address    0fe6
+end
+
+# not a physical register
+register INDF1
+         address    0fe7
+end
+
+register WREG
+         address    0fe8
+end
+
+register FSR0
+         address    0fe9
+         size       2
+
+         alias      FSR0L 0fe9
+         alias      FSR0H 0fea
+end
+
+# not a physical register
+register PLUSW0
+         address    0feb
+end
+
+# not a physical register
+register PREINC0
+         address    0fec
+end
+
+# not a physical register
+register POSTDEC0
+         address    0fed
+end
+
+# not a physical register
+register POSTINC0
+         address    0fee
+end
+
+# not a physical register
+register INDF0
+         address    0fef
+end
+
+register INTCON3
+         address    0ff0
+end
+
+register INTCON2
+         address    0ff1
+end
+
+register INTCON
+         address    0ff2
+end
+
+register PROD
+         address    0ff3
+         size       2
+
+         alias      PRODL 0ff3
+         alias      PRODH 0ff4
+end
+
+register TABLAT
+         address    0ff5
+end
+
+register TBLPTR
+         address    0ff6
+         size       3
+
+         alias      TBLPTRL 0ff6
+         alias      TBLPTRH 0ff7
+         alias      TBLPTRU 0ff8
+end
+
+register PCL
+         address    0ff9
+         size       3
+
+         alias      PCL    0ff9
+         alias      PCLATH 0ffa
+         alias      PCLATU 0ffb
+end
+
+register STKPTR
+         address    0ffc
+         read-mask  df
+         write-mask df
+
+         reset      0 mask 1f
+end
+
+register TOS
+         address    0ffd
+         size 3
+         read-mask  1fffff
+         write-mask 1fffff
+
+         power-on 0
+         brown-out f mask f
+
+         alias TOSL 0ffd
+         alias TOSH 0ffe
+         alias TOSU 0fff
 end

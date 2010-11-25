@@ -15,6 +15,38 @@
 #  You should have received a copy of the GNU General Public License
 #  along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 
+# register <register-name>
+#          description "<string>" (default: nil)
+#          address  <flat-address>
+#          size     <byte-size> (default: 1)
+#          read-mask    <mask> (default: all 1s)
+#          write-mask   <mask> (default: all 1s)
+#
+#          # initialization conditions
+#          power-on     <val> [mask <m>] (value at power-on reset, default: 0)
+#          brown-out    <val> [mask <m>] (value at brown-out reset, default: same as power-on)
+#
+#          reset        <val> [mask <m>] (value at software reset, default: 0)
+#          mclr-run     <val> [mask <m>] (value at mclr power-managed run reset, default: same as reset)
+#          mclr-sleep   <val> [mask <m>] (value at mclr idle/sleep run reset, default: same as reset)
+#          wdt          <val> [mask <m>] (value at watchdog timeout reset, default: same as reset)
+#          stack-ov     <val> [mask <m>] (value at stack overflow reset, default: same as reset)
+#          stack-uf     <val> [mask <m>] (value at stack underflow reset, default: same as reset)
+#
+#          wake-up-intr <val> [mask <m>] (value at interrupt wake-up, default: u)
+#          wake-up-wdt  <val> [mask <m>] (value at watchdog timeout wake-up, default: same as wake-up-intr)
+#
+#          bit  <bit-name> <bit-index> ["<description>"]
+#          ...
+#
+#          alias <sub-register-name> <flat-address> (aliases are always one byte)
+#
+#          ....
+# end
+#
+# unimplemented <address>
+#
+
 import sys
 import re
 
@@ -243,7 +275,7 @@ def parse_line_in_register(reg, line):
         if reg.validate() == False:
             return False
 
-        reg.debug()
+#        reg.debug()
 
         register_list.append(reg)
         reg = register('')
@@ -279,8 +311,21 @@ def parse_file(filename):
                     reg = register(m.group(1))
                     state = 2
                 else:
-                    err("syntax error")
-                    exit(1)
+                    m = re.match(r'unimplemented\ ([a-zA-Z0-9]+)$', line)
+                    if m:
+                        reg = register('__UIMP' + str.upper(m.group(1)))
+                        reg.set_once('address', int(m.group(1), 16))
+                        reg.set_once('read-mask', 0)
+                        reg.set_once('write-mask', 0)
+
+                        if reg.validate() == False:
+                            exit(1)
+
+                        register_list.append(reg)
+                        reg = register('')
+                    else:
+                        err("syntax error")
+                        exit(1)
             elif state == 2:
                 if parse_line_in_register(reg, line) == False:
                     exit(1)
@@ -290,8 +335,10 @@ def parse_file(filename):
 
 parse_file(sys.argv[1])
 
-print '''
-/*
+f = open(device + '_registers.h', 'w')
+
+f.write(
+'''/*
   Copyright (C) 2010, Nuno Subtil
 
   This file is part of Teppic.
@@ -310,6 +357,8 @@ print '''
   along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// automatically generated --- do not edit
+
 #if defined(__PIC_REGISTER_FILE__)
 #error multiple register file headers included
 #else
@@ -320,14 +369,83 @@ print '''
 // Generated from %s
 
 #define __%s__
-''' % (str.upper(device), sys.argv[1], str.upper(device))
+\n''' % (str.upper(device), sys.argv[1], str.upper(device)))
 
 for reg in register_list:
-    print "#define %s 0x%04X" % (reg['name'].ljust(16), reg['address'])
+    f.write("#define %s 0x%04X\n" % (reg['name'].ljust(16), reg['address']))
     if 'aliases' in reg:
         for alias in reg['aliases']:
-            print "#define  %s 0x%04X" % (alias['name'].ljust(15), alias['address'])
+            f.write("#define  %s 0x%04X\n" % (alias['name'].ljust(15), alias['address']))
 
     if 'bits' in reg:
         for bit in reg['bits']:
-            print "#define  %s 0x%04X" % (str(reg['name'] + "_" + bit['name']).ljust(15), bit['index'])
+            f.write("#define  %s 0x%04X\n" % (str(reg['name'] + "_" + bit['name']).ljust(15), bit['index']))
+
+f.write("\n")
+f.close()
+
+f = open(device + '_registers.cc', 'w')
+
+f.write(
+'''/*
+  Copyright (C) 2010, Nuno Subtil
+
+  This file is part of Teppic.
+
+  Teppic is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  Teppic is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// automatically generated --- do not edit
+
+#include "cpu/pic_registers.h"
+#include "cpu/%s_registers.h"
+
+static PICRegisterAlias __null_aliases[] = { { NULL, 0 } };
+static PICRegisterAlias __null_bits[] = { { NULL, 0 } };
+
+''' % (device))
+
+for reg in register_list:
+    if 'aliases' in reg and len(reg['aliases']) > 0:
+        f.write('static PICRegisterAlias __%s_aliases[] = {\n' % reg['name'])
+        for a in reg['aliases']:
+            f.write('    { %s, 0x%04X },\n' % (str('"' + a['name'] + '"').ljust(12), a['address']))
+        f.write('\n    { NULL, 0 }\n')
+        f.write('};\n\n')
+
+    if 'bits' in reg and len(reg['bits']) > 0:
+        f.write('static PICRegisterBit __%s_bits[] = {\n' % reg['name'])
+        for b in reg['bits']:
+            f.write('    { %s, %d },\n' % (str('"' + b['name'] + '"').ljust(12), b['index']))
+        f.write('\n    { NULL, 0 }\n')
+        f.write('};\n\n')
+
+f.write('static PICRegisterFile %s_register_file = {\n' % device)
+for reg in register_list:
+    f.write('    { %s, 0x%04X, %d, 0x%08X, 0x%08X, ' %
+            (str('"' + reg['name'] + '"').ljust(12), reg['address'], reg['size'],
+             reg['read-mask'], reg['write-mask']))
+
+    if 'bits' in reg and len(reg['bits']) > 0:
+        f.write('%s, ' % (str('__' + reg['name'] + '_bits').ljust(19)))
+    else:
+        f.write(str('__null_bits').ljust(19) + ', ')
+
+    if 'aliases' in reg and len(reg['aliases']) > 0:
+        f.write('%s },\n' % str('__' + reg['name'] + '_aliases').ljust(22))
+    else:
+        f.write(str('__null_aliases').ljust(22) + ' },\n')
+
+f.write('\n    { NULL, 0, 0, 0, 0, NULL, NULL }\n};\n\n')
+f.close()
