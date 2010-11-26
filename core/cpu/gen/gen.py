@@ -56,6 +56,8 @@ import re
 state = 0
 
 device = ""
+register_low = 0
+register_high = 0
 register_list = []
 
 line_no = 1
@@ -228,7 +230,7 @@ def strip_whitespace(line):
     l = re.sub(r'[\ \t]+', ' ', line)
     l = re.sub(r'\n', '', l)
     l = re.sub(r'^\ ', '', l)
-
+    l = re.sub(r' $', '', l)
     return l
 
 reg = register('')
@@ -289,6 +291,8 @@ def parse_file(filename):
     global state
     global device
     global register_list
+    global register_low
+    global register_high
     global line_no
 
     file = open(filename, 'r')
@@ -306,26 +310,34 @@ def parse_file(filename):
                     err("syntax error")
                     exit(1)
             elif state == 1:
-                m = re.match(r'register\ ([A-Z0-9]+)$', line)
+                m = re.match(r'register-space\ ([a-zA-Z0-9]+)\ ([a-zA-Z0-9]+)$', line)
                 if m:
-                    reg = register(m.group(1))
-                    state = 2
-                else:
-                    m = re.match(r'unimplemented\ ([a-zA-Z0-9]+)$', line)
-                    if m:
-                        reg = register('__UIMP' + str.upper(m.group(1)))
-                        reg.set_once('address', int(m.group(1), 16))
-                        reg.set_once('read-mask', 0)
-                        reg.set_once('write-mask', 0)
-
-                        if reg.validate() == False:
-                            exit(1)
-
-                        register_list.append(reg)
-                        reg = register('')
+                    if register_low != 0 or register_high != 0:
+                        err('multiple register-space definitions')
                     else:
-                        err("syntax error")
-                        exit(1)
+                        register_low = int(m.group(1), 16)
+                        register_high = int(m.group(2), 16)
+                else:
+                    m = re.match(r'register\ ([A-Z0-9]+)$', line)
+                    if m:
+                        reg = register(m.group(1))
+                        state = 2
+                    else:
+                        m = re.match(r'unimplemented\ ([a-zA-Z0-9]+)$', line)
+                        if m:
+                            reg = register('__UIMP' + str.upper(m.group(1)))
+                            reg.set_once('address', int(m.group(1), 16))
+                            reg.set_once('read-mask', 0)
+                            reg.set_once('write-mask', 0)
+                        
+                            if reg.validate() == False:
+                                exit(1)
+                            
+                                register_list.append(reg)
+                                reg = register('')
+                        else:
+                            err("syntax error")
+                            exit(1)
             elif state == 2:
                 if parse_line_in_register(reg, line) == False:
                     exit(1)
@@ -334,6 +346,9 @@ def parse_file(filename):
 
 
 parse_file(sys.argv[1])
+
+if register_low == 0 and register_high == 0:
+    err('missing register-space definition')
 
 f = open(device + '_registers.h', 'w')
 
@@ -369,7 +384,11 @@ f.write(
 // Generated from %s
 
 #define __%s__
-\n''' % (str.upper(device), sys.argv[1], str.upper(device)))
+
+#define %s_REGFIRST 0x%04X
+#define %s_REGLAST  0x%04X
+
+\n''' % (str.upper(device), sys.argv[1], str.upper(device), str.upper(device), register_low, str.upper(device), register_high))
 
 for reg in register_list:
     f.write("#define %s 0x%04X\n" % (reg['name'].ljust(16), reg['address']))
@@ -420,32 +439,32 @@ for reg in register_list:
     if 'aliases' in reg and len(reg['aliases']) > 0:
         f.write('static PICRegisterAlias __%s_aliases[] = {\n' % reg['name'])
         for a in reg['aliases']:
-            f.write('    { %s, 0x%04X },\n' % (str('"' + a['name'] + '"').ljust(12), a['address']))
+            f.write('    { %s, %s },\n' % (str('"' + a['name'] + '"').ljust(8), a['name'].ljust(8)))
         f.write('\n    { NULL, 0 }\n')
         f.write('};\n\n')
 
     if 'bits' in reg and len(reg['bits']) > 0:
         f.write('static PICRegisterBit __%s_bits[] = {\n' % reg['name'])
         for b in reg['bits']:
-            f.write('    { %s, %d },\n' % (str('"' + b['name'] + '"').ljust(12), b['index']))
+            f.write('    { %s, %s },\n' % (str('"' + b['name'] + '"').ljust(10), str(reg['name'] + '_' + b['name']).ljust(14)))
         f.write('\n    { NULL, 0 }\n')
         f.write('};\n\n')
 
 f.write('static PICRegisterFile %s_register_file = {\n' % device)
 for reg in register_list:
-    f.write('    { %s, 0x%04X, %d, 0x%08X, 0x%08X, ' %
-            (str('"' + reg['name'] + '"').ljust(12), reg['address'], reg['size'],
+    f.write('    { %s, %s, %d, 0x%08X, 0x%08X, ' %
+            (str('"' + reg['name'] + '"').ljust(12), reg['name'].ljust(10), reg['size'],
              reg['read-mask'], reg['write-mask']))
 
     if 'bits' in reg and len(reg['bits']) > 0:
-        f.write('%s, ' % (str('__' + reg['name'] + '_bits').ljust(19)))
+        f.write('%s, ' % (str('__' + reg['name'] + '_bits').ljust(15)))
     else:
-        f.write(str('__null_bits').ljust(19) + ', ')
+        f.write(str('__null_bits').ljust(15) + ', ')
 
     if 'aliases' in reg and len(reg['aliases']) > 0:
-        f.write('%s },\n' % str('__' + reg['name'] + '_aliases').ljust(22))
+        f.write('%s },\n' % str('__' + reg['name'] + '_aliases').ljust(18))
     else:
-        f.write(str('__null_aliases').ljust(22) + ' },\n')
+        f.write(str('__null_aliases').ljust(18) + ' },\n')
 
 f.write('\n    { NULL, 0, 0, 0, 0, NULL, NULL }\n};\n\n')
 f.close()

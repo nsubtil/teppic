@@ -17,7 +17,8 @@
 
 # PIC18F2550 register file description
 
-device pic18f2550
+device                pic18f2550
+register-space        0f60 0fff
 
 unimplemented 0f60
 unimplemented 0f61
@@ -659,14 +660,17 @@ register TXSTA
          bit        CSRC    7
 end
 
+# EUSART transmit register
 register TXREG
          address    0fad
 end
 
+# EUSART receive register
 register RCREG
          address    0fae
 end
 
+# EUSART baud rate generator register
 register SPBRG
          address    0faf
          size       2
@@ -687,6 +691,7 @@ register T3CON
          bit        RD16    7
 end
 
+# timer3 register
 register TMR3
          address    0fb2
          size       2
@@ -736,18 +741,42 @@ end
 
 register ECCP1DEL
          address    0fb7
+         read-mask  80
+         write-mask 80
+
+         bit        PRSEN   7
 end
 
 register BAUDCON
          address    0fb8
+         read-mask  fb
+         write-mask fb
+
+         bit        ABDEN   0
+         bit        WUE     1
+         bit        BRG16   3
+         bit        TXCKP   4
+         bit        RXDTP   5
+         bit        RCIDL   6
+         bit        ABDOVF  7
 end
 
 unimplemented 0fb9
 
 register CCP2CON
          address    0fba
+         read-mask  3f
+         write-mask 3f
+
+         bit        CCP2M0  0
+         bit        CCP2M1  1
+         bit        CCP2M2  2
+         bit        CCP2M3  3
+         bit        DC2B0   4
+         bit        DC2B1   5
 end
 
+# capture/compare/PWM register 2
 register CCPR2
          address    0fbb
          size       2
@@ -758,8 +787,18 @@ end
 
 register CCP1CON
          address    0fbd
+         read-mask  3f
+         write-mask 3f
+
+         bit        CCP1M0  0
+         bit        CCP1M1  1
+         bit        CCP1M2  2
+         bit        CCP1M3  3
+         bit        DC1B0   4
+         bit        DC1B1   5
 end
 
+# capture/compare/PWM register 1
 register CCPR1
          address    0fbe
          size       2
@@ -770,16 +809,45 @@ end
 
 register ADCON2
          address    0fc0
+         read-mask  bf
+         write-mask bf
+
+         bit        ADCS0   0
+         bit        ADCS1   1
+         bit        ADCS2   2
+         bit        ACQT0   3
+         bit        ACQT1   4
+         bit        ACQT2   5
+         bit        ADFM    7
 end
 
 register ADCON1
          address    0fc1
+         read-mask  3f
+         write-mask 3f
+
+         bit        PCFG0   0
+         bit        PCFG1   1
+         bit        PCFG2   2
+         bit        PCFG3   3
+         bit        VCFG0   4
+         bit        VCFG1   5
 end
 
 register ADCON0
          address    0fc2
+         read-mask  3f
+         write-mask 3f
+
+         bit        ADON    0
+         bit        GO      1
+         bit        CHS0    2
+         bit        CHS1    3
+         bit        CHS2    4
+         bit        CHS3    5
 end
 
+# A/D result register
 register ADRES
          address    0fc3
          size       2
@@ -790,40 +858,96 @@ end
 
 register SSPCON2
          address    0fc5
+
+         bit        SEN     0
+         bit        RSEN    1
+         bit        ADMSK1  1   # I2C slave mode only
+         bit        PEN     2
+         bit        ADMSK2  2   # I2C slave mode only
+         bit        RCEN    3
+         bit        ADMSK3  3   # I2C slave mode only
+         bit        ACKEN   4
+         bit        ADMSK4  4   # I2C slave mode only
+         bit        ACKDT   5
+         bit        ADMSK5  5   # I2C slave mode only
+         bit        ACKSTAT 6
+         bit        GCEN    7
 end
 
 register SSPCON1
          address    0fc6
+
+         bit        SSPM0   0
+         bit        SSPM1   1
+         bit        SSPM2   2
+         bit        SSPM3   3
+         bit        CKP     4
+         bit        SSPEN   5
+         bit        SSPOV   6
+         bit        WCOL    7
 end
 
 register SSPSTAT
          address    0fc7
+
+         bit        BF      0
+         bit        UA      1
+         bit        R       2
+         bit        S       3
+         bit        P       4
+         bit        D       5
+         bit        CKE     6
+         bit        SMP     7
 end
 
+# MSSP address register in I2C slave mode. MSSP baud rate reload register in I2C master mode
 register SSPADD
          address    0fc8
 end
 
+# MSSP receive buffer/transmit register
 register SSPBUF
          address    0fc9
 end
 
 register T2CON
          address    0fca
+         read-mask  7f
+         write-mask 7f
+
+         bit        T2CKPS0     0
+         bit        T2CKPS1     1
+         bit        TMR2ON      2
+         bit        T2OUTPS0    3
+         bit        T2OUTPS1    4
+         bit        T2OUTPS2    5
+         bit        T2OUTPS3    6
 end
 
+# timer2 period register
 register PR2
          address    0fcb
 end
 
+# timer2 register
 register TMR2
          address    0fcc
 end
 
 register T1CON
          address    0fcd
+
+         bit        TMR1ON  0
+         bit        TMR1CS  1
+         bit        T1SYNC  2
+         bit        T1OSCEN 3
+         bit        T1CKPS0 4
+         bit        T1CKPS1 5
+         bit        T1RUN   6
+         bit        RD16    7
 end
 
+# timer1 register
 register TMR1
          address    0fce
          size       2
@@ -832,28 +956,74 @@ register TMR1
          alias      TMR1H 0fcf
 end
 
+
 register RCON
          address    0fd0
+         read-mask  df
+         write-mask df
+
+         bit        BOR     0
+         bit        POR     1
+         bit        PD      2
+         bit        TO      3
+         bit        RI      4
+         # the SBOREN bit is only avaliable when BOREN<1:0> = 01
+         # otherwise, the bit reads as 0
+         bit        SBOREN  6
+         bit        IPEN    7
 end
 
 register WDTCON
          address    0fd1
+         read-mask  1
+         write-mask 1
+
+         bit        SWDTEN  0
 end
 
 register HLVDCON
          address    0fd2
+         read-mask  7f
+         write-mask 7f
+
+         bit        HLVDL0  0
+         bit        HLVDL1  1
+         bit        HLVDL2  2
+         bit        HLVDL3  3
+         bit        HLVDEN  4
+         bit        IRVST   5
+         bit        VDIRMAG 7
 end
 
 register OSCCON
          address    0fd3
+
+         bit        SCS0    0
+         bit        SCS1    1
+         bit        IOFS    2
+         bit        OSTS    3
+         bit        IRCF0   4
+         bit        IRCF1   5
+         bit        IRCF2   6
+         bit        IDLEN   7
 end
 
 unimplemented 0fd4
 
 register T0CON
          address    0fd5
+
+         bit        T0PS0   0
+         bit        T0PS1   1
+         bit        T0PS2   2
+         bit        PSA     3
+         bit        T0SE    4
+         bit        T0CS    5
+         bit        T08BIT  6
+         bit        TMR0ON  7
 end
 
+# timer0 register
 register TMR0
          address    0fd6
          size       2
@@ -877,108 +1047,151 @@ register STATUS
          bit        N   4
 end
 
+# indirect data memory address pointer 2
 register FSR2
          address    0fd9
          size       2
+         read-mask  0fff
+         write-mask 0fff
 
          alias      FSR2L 0fd9
          alias      FSR2H 0fda
 end
 
+# uses contents of FSR2 to address data memory
+# value of FSR2 pre-incremented and offset by W
 # not a physical register
 register PLUSW2
          address    0fdb
 end
 
+# uses contents of FSR2 to address data memory
+# value of FSR2 pre-incremented
 # not a physical register
 register PREINC2
          address    0fdc
 end
 
+# uses contents of FSR2 to address data memory
+# value of FSR2 post-decremented
 # not a physical register
 register POSTDEC2
          address    0fdd
 end
 
+# uses contents of FSR2 to address data memory
+# value of FSR2 post-incremented
 # not a physical register
 register POSTINC2
          address    0fde
 end
 
+# uses contents of FSR2 to address data memory
+# value of FSR2 not changed
 # not a physical register
 register INDF2
          address    0fdf
 end
 
+# bank select register
 register BSR
          address    0fe0
+         read-mask  0f
+         write-mask 0f
 end
 
+# indirect data memory address pointer 1
 register FSR1
          address    0fe1
          size       2
+         read-mask  0fff
+         write-mask 0fff
 
          alias      FSR1L 0fe1
          alias      FSR1H 0fe2
 end
 
+# uses contents of FSR1 to address data memory
+# value of FSR1 pre incremented and offset by W
 # not a physical register
 register PLUSW1
          address    0fe3
 end
 
+# uses contents of FSR1 to address data memory
+# value of FSR1 pre-incremented
 # not a physical register
 register PREINC1
          address    0fe4
 end
 
+# uses contents of FSR1 to address data memory
+# value of FSR1 post-decremented
 # not a physical register
 register POSTDEC1
          address    0fe5
 end
 
+# uses contents of FSR1 to address data memory
+# value of FSR1 post-incremented
 # not a physical register
 register POSTINC1
          address    0fe6
 end
 
+# uses contents of FSR1 to address data memory
+# value of FSR1 not changed
 # not a physical register
 register INDF1
          address    0fe7
 end
 
+# working register
 register WREG
          address    0fe8
 end
 
+# indirect data memory address pointer 0
 register FSR0
          address    0fe9
          size       2
+         read-mask  0fff
+         write-mask 0fff
 
          alias      FSR0L 0fe9
          alias      FSR0H 0fea
 end
 
+# uses contents of FSR0 to address data memory
+# value of FSR0 pre-incremented and offset by W
 # not a physical register
 register PLUSW0
          address    0feb
 end
 
+# uses contents of FSR0 to address data memory
+# value of FSR0 pre-incremented
 # not a physical register
 register PREINC0
          address    0fec
 end
 
+# uses contents of FSR0 to address data memory
+# value of FSR0 post-decremented
 # not a physical register
 register POSTDEC0
          address    0fed
 end
 
+# uses contents of FSR0 to address data memory
+# value of FSR0 post-incremented
 # not a physical register
 register POSTINC0
          address    0fee
 end
 
+# uses contents of FSR0 to address data memory
+# value of FSR0 not changed
 # not a physical register
 register INDF0
          address    0fef
@@ -986,16 +1199,46 @@ end
 
 register INTCON3
          address    0ff0
+         read-mask  db
+         write-mask db
+
+         bit        INT1IF  0
+         bit        INT2IF  1
+         bit        INT1IE  3
+         bit        INT2IE  4
+         bit        INT1IP  6
+         bit        INT2IP  7
 end
 
 register INTCON2
          address    0ff1
+         read-mask  f5
+         write-mask f5
+
+         bit        RBIP    0
+         bit        TMR0IP  2
+         bit        INTEDG2 4
+         bit        INTEDG1 5
+         bit        INTEDG0 6
+         bit        RBPU    7
 end
 
 register INTCON
          address    0ff2
+
+         bit        RBIF    0
+         bit        INT0IF  1
+         bit        TMR0IF  2
+         bit        RBIE    3
+         bit        INT0IE  4
+         bit        TMR0IE  5
+         bit        PEIE    6
+         bit        GIEL    6
+         bit        GIE     7
+         bit        GIEH    7
 end
 
+# product register
 register PROD
          address    0ff3
          size       2
@@ -1004,13 +1247,17 @@ register PROD
          alias      PRODH 0ff4
 end
 
+# program memory table latch
 register TABLAT
          address    0ff5
 end
 
+# program memory table pointer
 register TBLPTR
          address    0ff6
          size       3
+         read-mask  3ff
+         write-mask 3ff
 
          alias      TBLPTRL 0ff6
          alias      TBLPTRH 0ff7
@@ -1020,9 +1267,14 @@ end
 register PCL
          address    0ff9
          size       3
+         read-mask  1fffff
+         write-mask 1fffff
 
+         # PC low byte
          alias      PCL    0ff9
+         # holding register for PC <15:8>
          alias      PCLATH 0ffa
+         # holding register for PC<20:16>
          alias      PCLATU 0ffb
 end
 
@@ -1032,8 +1284,17 @@ register STKPTR
          write-mask df
 
          reset      0 mask 1f
+
+         bit        SP0    0
+         bit        SP1    1
+         bit        SP2    2
+         bit        SP3    3
+         bit        SP4    4
+         bit        STKUNF 6
+         bit        STKFUL 7
 end
 
+# top-of-stack register
 register TOS
          address    0ffd
          size 3
