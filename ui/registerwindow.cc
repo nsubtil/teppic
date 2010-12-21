@@ -19,8 +19,33 @@
 
 #include "registerwindow.h"
 
-RegisterWindow::RegisterWindow(QWidget *parent)
+RegisterWindow::RegisterWindow(PICRegisterFile *register_file, QWidget *parent)
   : QDockWidget(parent)
 {
+    int c;
+
     ui.setupUi(this);
+    registers = register_file;
+
+    c = registers->num_registers();
+    ui.registerTable->setRowCount(c);
+
+    for(c = 0; c < registers->num_registers(); c++)
+    {
+        QTableWidgetItem *i;
+        const PICRegister *r;
+        char str[128];
+
+        r = registers->get_register(c);
+
+        snprintf(str, 128, "%04x", r->addr);
+        i = new QTableWidgetItem(QString(str));
+        ui.registerTable->setItem(c, 0, i);
+
+        i = new QTableWidgetItem(QString(r->name));
+        ui.registerTable->setItem(c, 1, i);
+
+        i = new QTableWidgetItem(QString("deadf007"));
+        ui.registerTable->setItem(c, 2, i);
+    }
 }

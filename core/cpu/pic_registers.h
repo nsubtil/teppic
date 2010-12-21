@@ -22,6 +22,10 @@
 
 #include "types.h"
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 typedef struct PICRegisterBitRec
 {
     const char *name;
@@ -47,9 +51,17 @@ typedef struct PICRegisterRec
     PICRegisterAlias *aliases;
 } PICRegister;
 
-typedef struct PICRegisterFileRec
+class PICRegisterFile
 {
+private:
     PICRegister *registers;
-} PICRegisterFile;
+    int register_count;
+
+public:
+    PICRegisterFile(PICRegister *register_list);
+
+    int num_registers(void);
+    const PICRegister *get_register(int idx);
+};
 
 #endif

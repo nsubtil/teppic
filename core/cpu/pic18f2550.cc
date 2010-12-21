@@ -99,8 +99,11 @@ static pic16_decoded_insn pic18f2550_decode_table[] = {
 };
 #undef CLASS
 
+extern PICRegister pic18f2550_register_file[];
+
 PIC18F2550::PIC18F2550()
 {
+    registers = new PICRegisterFile(pic18f2550_register_file);
     mmc = new M18FX550();
     PIC::decode_table = pic18f2550_decode_table;
 }

@@ -20,6 +20,10 @@
 #include "mainwindow.h"
 #include "registerwindow.h"
 
+#include "cpu/pic18f2550.h"
+
+PIC18F2550 pic;
+
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
@@ -28,10 +32,12 @@ int main(int argc, char **argv)
     win.setWindowTitle(QObject::tr("Teppic"));
     win.show();
 
-    RegisterWindow regwin(&win);
+    RegisterWindow regwin(pic.registers, &win);
     regwin.setWindowTitle(QObject::tr("Register map"));
     regwin.setFloating(true);
     regwin.show();
+
+    pic.mmc->load_hex_file("/Users/nuno/pic/test.hex");
 
     return app.exec();
 }

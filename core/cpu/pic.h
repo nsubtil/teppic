@@ -21,6 +21,7 @@
 #define __PIC_H
 
 #include "mem/mmc.h"
+#include "cpu/pic_registers.h"
 
 typedef enum {
     PIC16_insn_daf,
@@ -248,6 +249,8 @@ typedef struct pic16_decoded_insn_rec
 class PIC
 {
  public:
+    PICRegisterFile *registers;
+
     pic16_decoded_insn *decode_table;
     MMC *mmc;
    

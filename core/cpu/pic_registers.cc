@@ -17,28 +17,28 @@
   along with Teppic.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __REGISTER_WINDOW_H
-#define __REGISTER_WINDOW_H
-
-#include <QDockWidget>
-#include "ui_registerwindow.h"
+#include <assert.h>
 
 #include "cpu/pic_registers.h"
 
-class RegisterWindow : public QDockWidget
+PICRegisterFile::PICRegisterFile(PICRegister *r)
 {
-    Q_OBJECT
+    registers = r;
 
-public:
-    RegisterWindow(PICRegisterFile *register_file, QWidget *parent = NULL);
+    register_count = 0;
+    while(registers[register_count].name != NULL)
+    {
+        register_count++;
+    }
+}
 
-public slots:
-signals:
+int PICRegisterFile::num_registers(void)
+{
+    return register_count;
+}
 
-private:
-    Ui::RegisterWidget ui;
-    PICRegisterFile *registers;
-};
-
-#endif
-
+const PICRegister *PICRegisterFile::get_register(int idx)
+{
+    assert(idx < register_count);
+    return &registers[idx];
+}
