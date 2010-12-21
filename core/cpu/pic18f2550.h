@@ -57,11 +57,14 @@
 #define HW_WR(a, val) FL_HW_MEMWR(a, val)
 
 // macros to set ALU status bits: carry, digit carry, zero, overflow, negative
-#define SET(bit) HW_WR(STATUS, REGRD(STATUS) | (1 << bit))
-#define CLR(bit) HW_WR(STATUS, REGRD(STATUS) & ~(1 << bit))
+#define SET(bit) debug(" SET(" #bit ")"); HW_WR(STATUS, REGRD(STATUS) | (1 << STATUS_##bit))
+#define CLR(bit) debug(" CLR(" #bit ")"); HW_WR(STATUS, REGRD(STATUS) & ~(1 << STATUS_##bit))
 
 #define SET_Z(a) if (a == 0) { SET(Z); } else { CLR(Z); }
 #define SET_N(a) if (ISNEG8(a)) { SET(N); } else { CLR(N); }
+
+#define BIT(reg, bit) (1 << reg##_##bit)
+#define ST(bit) BIT(STATUS, bit)
 
 class PIC18F2550 : public PIC
 {
@@ -102,7 +105,7 @@ class PIC18F2550 : public PIC
 
     inline void alu_set_flags(u32 res, u32 mask)
     {
-        if (mask & N)
+        if (mask & ST(N))
         {
             if (ISNEG8(RES8(res)))
             {
@@ -112,7 +115,7 @@ class PIC18F2550 : public PIC
             }
         }
 
-        if (mask & OV)
+        if (mask & ST(OV))
         {
             if (OF8(res))
             {
@@ -122,7 +125,7 @@ class PIC18F2550 : public PIC
             }
         }
 
-        if (mask & Z)
+        if (mask & ST(Z))
         {
             if(RES8(res) == 0)
             {
@@ -132,7 +135,7 @@ class PIC18F2550 : public PIC
             }
         }
 
-        if (mask & DC)
+        if (mask & ST(DC))
         {
             if(DF8(res))
             {
@@ -142,7 +145,7 @@ class PIC18F2550 : public PIC
             }
         }
 
-        if (mask & C)
+        if (mask & ST(C))
         {
             if (CF8(res))
             {

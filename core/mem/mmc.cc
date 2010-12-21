@@ -218,7 +218,7 @@ u32 MMC::access_bank_to_flat(u8 offset)
         return offset;
     }
 
-    return offset + 0xeff;
+    return offset + 0xf00;
 }
 
 
