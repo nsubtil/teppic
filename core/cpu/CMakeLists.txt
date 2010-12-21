@@ -20,6 +20,7 @@ set(cpu_sources
     cpu/pic.h
     cpu/pic18f2550.cc
     cpu/pic18f2550.h
+    cpu/pic18f2550_registers.cc
     cpu/pic18f2550_registers.h
 )
 

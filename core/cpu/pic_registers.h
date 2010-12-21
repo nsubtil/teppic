@@ -20,21 +20,23 @@
 #ifndef __PIC_REGISTERS_H
 #define __PIC_REGISTERS_H
 
+#include "types.h"
+
 typedef struct PICRegisterBitRec
 {
-    char *name;
+    const char *name;
     u32 bit;
 } PICRegisterBit;
 
 typedef struct PICRegisterAliasRec
 {
-    char *name;
+    const char *name;
     u32 addr;
 } PICRegisterAlias;
 
 typedef struct PICRegisterRec
 {
-    char *name;
+    const char *name;
     u32 addr;
     u32 len;
 

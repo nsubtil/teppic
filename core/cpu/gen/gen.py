@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 #  Copyright (C) 2010, Nuno Subtil
 #
 #  This file is part of Teppic.
@@ -430,8 +432,12 @@ f.write(
 #include "cpu/pic_registers.h"
 #include "cpu/%s_registers.h"
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 static PICRegisterAlias __null_aliases[] = { { NULL, 0 } };
-static PICRegisterAlias __null_bits[] = { { NULL, 0 } };
+static PICRegisterBit __null_bits[] = { { NULL, 0 } };
 
 ''' % (device))
 
@@ -450,7 +456,8 @@ for reg in register_list:
         f.write('\n    { NULL, 0 }\n')
         f.write('};\n\n')
 
-f.write('static PICRegisterFile %s_register_file = {\n' % device)
+#f.write('static PICRegisterFile %s_register_file = {\n' % device)
+f.write('PICRegister %s_register_file[] = {\n' % device)
 for reg in register_list:
     f.write('    { %s, %s, %d, 0x%08X, 0x%08X, ' %
             (str('"' + reg['name'] + '"').ljust(12), reg['name'].ljust(10), reg['size'],
@@ -467,4 +474,5 @@ for reg in register_list:
         f.write(str('__null_aliases').ljust(18) + ' },\n')
 
 f.write('\n    { NULL, 0, 0, 0, 0, NULL, NULL }\n};\n\n')
+
 f.close()
